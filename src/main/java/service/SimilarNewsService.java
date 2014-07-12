@@ -77,7 +77,7 @@ public class SimilarNewsService {
 		queryString=queryString.replace(":", "");
 		queryString=queryString.toLowerCase();
 		findSimilar(queryString,id);
-		return null;
+		return "OK";
 	}
 
 	public void start() throws IOException{
@@ -171,7 +171,7 @@ public class SimilarNewsService {
 	        Document aSimilar = indexSearcher.doc( scoreDoc.doc );
 	        String similarTitle = aSimilar.get("title");
 	        String similarContent = aSimilar.get("content");
-	        if(!aSimilar.get("id").toString().equals(id) && similarNews.size()<=5){
+	        if(!aSimilar.get("id").toString().equals(id) && similarNews.size()<5){
 	        	similarNews.add(datasource.get(News.class, new ObjectId(aSimilar.get("id"))));
 	        }
 	        System.out.println("====similar finded====");
