@@ -3,7 +3,7 @@
          xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-  <display-name>LuceneHaberfili</display-name>
+  <display-name>haberfililucene</display-name>
  <servlet>
    <servlet-name>jersey-serlvet</servlet-name>
 		<servlet-class>
@@ -17,7 +17,7 @@
 </servlet>
   <servlet-mapping>
     <servlet-name>jersey-serlvet</servlet-name>
-    <url-pattern>/lucenehaberfili/*</url-pattern>
+    <url-pattern>/haberfililucene/*</url-pattern>
   </servlet-mapping>
   <session-config>
     <session-timeout>30</session-timeout>
