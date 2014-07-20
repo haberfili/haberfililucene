@@ -37,6 +37,8 @@ import org.tartarus.snowball.ext.TurkishStemmer;
 
 import com.google.code.morphia.Datastore;
 
+import container.NewsContainer;
+
 @Path("/SimilarNews")
 public class SimilarNewsService {
 
@@ -50,8 +52,7 @@ public class SimilarNewsService {
 	public String findSimilarNews(@PathParam("id") String id)throws Exception {
 		Datastore datasource = DBConnector.getDatasource();
 		News news =datasource.get(News.class, new ObjectId(id));
-		List<News> newsList = datasource.find(News.class).field("createDate").lessThan(news.createDate+(24*60*60*1000*2))
-				.field("createDate").greaterThan(news.createDate-(24*60*60*1000*2)).asList();
+		List<News> newsList = NewsContainer.getNews();
 		start();
 		writerEntries(newsList);
 		
@@ -77,6 +78,8 @@ public class SimilarNewsService {
 		queryString=queryString.replace(":", "");
 		queryString=queryString.toLowerCase();
 		findSimilar(queryString,id);
+		NewsContainer.add(news);
+		NewsContainer.scale();
 		return "OK";
 	}
 
