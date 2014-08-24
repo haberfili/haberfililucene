@@ -51,6 +51,7 @@ public class SimilarNewsService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("findSimilarNews/{id}")
 	public String findSimilarNews(@PathParam("id") String id)throws Exception {
+		addToLuceneDB(id);
 		Datastore datasource = DBConnectorLucene.getDatasource();
 		News news =datasource.get(News.class, new ObjectId(id));
 		List<News> newsList = NewsContainer.getNews();
@@ -82,6 +83,15 @@ public class SimilarNewsService {
 		NewsContainer.add(news);
 		NewsContainer.scale();
 		return "OK";
+	}
+
+	private void addToLuceneDB(String id) throws Exception {
+		Datastore datasource = DBConnector.getDatasource();
+		News news =datasource.get(News.class, new ObjectId(id));
+		Datastore datasourceLucene = DBConnectorLucene.getDatasource();
+		if(datasourceLucene.get(News.class, new ObjectId(id))==null){
+			datasourceLucene.save(news);	
+		}
 	}
 
 	public void start() throws IOException{
@@ -168,8 +178,9 @@ public class SimilarNewsService {
 		Query query = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer).parse(querystr.trim());
 
 	    TopDocs topDocs = indexSearcher.search(query,10);
-	    Datastore datasource = DBConnector.getDatasource();
+	    
 	    List<News>similarNews=new ArrayList<News>();
+	    Datastore datasourceLucene = DBConnectorLucene.getDatasource();
 	    for ( ScoreDoc scoreDoc : topDocs.scoreDocs ) {
 	        if(similarNews.size()>=5){
 	        	break;
@@ -179,12 +190,13 @@ public class SimilarNewsService {
 	        String similarContent = aSimilar.get("content");
 	        
 	        if(!aSimilar.get("id").toString().equals(id)){
-	        	similarNews.add(datasource.get(News.class, new ObjectId(aSimilar.get("id"))));
+	        	similarNews.add(datasourceLucene.get(News.class, new ObjectId(aSimilar.get("id"))));
 	        }
 	        System.out.println("====similar finded====");
 	        System.out.println("title: "+ similarTitle);
 	        System.out.println("content: "+ similarContent);
 	    }
+	    Datastore datasource = DBConnector.getDatasource();
 	    News news =datasource.get(News.class, new ObjectId(id));
 	    news.similarNews=similarNews;
 	    datasource.save(news);
