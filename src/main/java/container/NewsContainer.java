@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import models.News;
-import mongo.DBConnector;
+import mongo.DBConnectorLucene;
 
 import com.google.code.morphia.Datastore;
 
@@ -25,7 +25,7 @@ public class NewsContainer {
 		
 		public static List<News> getNews() throws Exception{
 			if(newsList==null){
-				Datastore datasource = DBConnector.getDatasource();
+				Datastore datasource = DBConnectorLucene.getDatasource();
 				newsList=datasource.find(News.class).field("createDate").lessThan(new Date().getTime()+(NewsContainer.TWO_DAYS))
 							.field("createDate").greaterThan(new Date().getTime()-(NewsContainer.TWO_DAYS)).asList();
 			}

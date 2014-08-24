@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import models.News;
 import mongo.DBConnector;
+import mongo.DBConnectorLucene;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -50,7 +51,7 @@ public class SimilarNewsService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("findSimilarNews/{id}")
 	public String findSimilarNews(@PathParam("id") String id)throws Exception {
-		Datastore datasource = DBConnector.getDatasource();
+		Datastore datasource = DBConnectorLucene.getDatasource();
 		News news =datasource.get(News.class, new ObjectId(id));
 		List<News> newsList = NewsContainer.getNews();
 		start();
@@ -168,19 +169,23 @@ public class SimilarNewsService {
 
 	    TopDocs topDocs = indexSearcher.search(query,10);
 	    Datastore datasource = DBConnector.getDatasource();
-	    News news =datasource.get(News.class, new ObjectId(id));
 	    List<News>similarNews=new ArrayList<News>();
 	    for ( ScoreDoc scoreDoc : topDocs.scoreDocs ) {
-	        Document aSimilar = indexSearcher.doc( scoreDoc.doc );
+	        if(similarNews.size()>=5){
+	        	break;
+	        }
+	    	Document aSimilar = indexSearcher.doc( scoreDoc.doc );
 	        String similarTitle = aSimilar.get("title");
 	        String similarContent = aSimilar.get("content");
-	        if(!aSimilar.get("id").toString().equals(id) && similarNews.size()<5){
+	        
+	        if(!aSimilar.get("id").toString().equals(id)){
 	        	similarNews.add(datasource.get(News.class, new ObjectId(aSimilar.get("id"))));
 	        }
 	        System.out.println("====similar finded====");
 	        System.out.println("title: "+ similarTitle);
 	        System.out.println("content: "+ similarContent);
 	    }
+	    News news =datasource.get(News.class, new ObjectId(id));
 	    news.similarNews=similarNews;
 	    datasource.save(news);
 
