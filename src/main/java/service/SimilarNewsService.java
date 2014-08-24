@@ -189,7 +189,7 @@ public class SimilarNewsService {
 	        String similarTitle = aSimilar.get("title");
 	        String similarContent = aSimilar.get("content");
 	        
-	        if(!aSimilar.get("id").toString().equals(id)){
+	        if(!aSimilar.get("id").toString().equals(id) && !hasNews(similarNews,aSimilar.get("id"))){
 	        	similarNews.add(datasourceLucene.get(News.class, new ObjectId(aSimilar.get("id"))));
 	        }
 	        System.out.println("====similar finded====");
@@ -201,6 +201,15 @@ public class SimilarNewsService {
 	    news.similarNews=similarNews;
 	    datasource.save(news);
 
+	}
+
+	private boolean hasNews(List<News> similarNews, String id) {
+		for(News news : similarNews){
+			if(news.id.toString().equals(id)){
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
