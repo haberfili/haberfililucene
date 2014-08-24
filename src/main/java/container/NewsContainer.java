@@ -16,14 +16,19 @@ public class NewsContainer {
 		public static boolean scaling=false;
 		
 		public static void scale(){
-			scaling=true;
-			for(News news:newsList){
-				if(news.createDate<new Date().getTime()-(NewsContainer.TWO_DAYS)){
-					newsList.remove(news);
+			
+			try{
+				scaling=true;
+				for(News news:newsList){
+					if(news.createDate<new Date().getTime()-(NewsContainer.TWO_DAYS)){
+						newsList.remove(news);
+					}
+					
 				}
-				
+			}finally{
+				scaling=false;	
 			}
-			scaling=false;
+			
 		}
 		
 		public static List<News> getNews() throws Exception{
