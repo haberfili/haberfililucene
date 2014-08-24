@@ -13,14 +13,17 @@ public class NewsContainer {
 
 		public static final int TWO_DAYS=24*60*60*1000*2;
 		private static List<News> newsList;
+		public static boolean scaling=false;
 		
 		public static void scale(){
+			scaling=true;
 			for(News news:newsList){
 				if(news.createDate<new Date().getTime()-(NewsContainer.TWO_DAYS)){
 					newsList.remove(news);
 				}
 				
 			}
+			scaling=false;
 		}
 		
 		public static List<News> getNews() throws Exception{

@@ -81,7 +81,9 @@ public class SimilarNewsService {
 		queryString=queryString.toLowerCase();
 		findSimilar(queryString,id);
 		NewsContainer.add(news);
-		NewsContainer.scale();
+		if(!NewsContainer.scaling){
+			NewsContainer.scale();
+		}
 		return "OK";
 	}
 
