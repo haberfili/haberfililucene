@@ -1,6 +1,7 @@
 package container;
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,14 +20,18 @@ public class NewsContainer {
 		public static Queue<String> queue=new LinkedList<String>();
 		
 		public static void scale(){
-			
+			System.out.println("news count before remove:"+newsList.size());
+			List<News>newsToRemove=new ArrayList<News>();
 			for(News news:newsList){
 				if(news.createDate<new Date().getTime()-(NewsContainer.TWO_DAYS)){
-					newsList.remove(news);
+					newsToRemove.add(news);
 				}
 				
 			}
-			
+			for(News news :newsToRemove){
+				newsList.remove(news);
+			}
+			System.out.println("news count after:"+newsList.size());
 		}
 		
 		public static List<News> getNews() throws Exception{
