@@ -5,9 +5,9 @@ public class App {
 
 	public static void main(String[] args) throws Exception {
 		SimilarNewsService service= new SimilarNewsService();
-		service.findSimilarNews("53fa38d2e4b0dec253c89261");
+		service.findSimilarNews("53fccfffe4b02b14a04c50c7");
 //		System.out.println("asd");
-//		service.findSimilarNews("53cc3b8ee4b0bec0004be866");
+		service.findSimilarNews("53fccf07e4b02b14a04c50c4");
 	}
 
 }
