@@ -46,37 +46,7 @@ public class SimilarNewsFinder implements Runnable {
 			String id=NewsContainer.queue.poll();
 			try{
 				if(id!=null){
-					addToLuceneDB(id);
-					Datastore datasource = DBConnectorLucene.getDatasource();
-					News news =datasource.get(News.class, new ObjectId(id));
-					List<News> newsList = NewsContainer.getNews();
-					start();
-					writerEntries(newsList);
-					
-					String queryString=stem(news.title);
-					if(news.detail!=null){
-						queryString+=" "+stem(news.detail);
-					}
-					if(news.detailMore!=null){
-						queryString+=" "+stem(news.detailMore);
-					}
-					queryString=queryString.replace("\"", "");
-					queryString=queryString.replace(".", "");
-					queryString=queryString.replace("’", "");
-					queryString=queryString.replace("'", "");
-					queryString=queryString.replace(" ve ", "");
-					queryString=queryString.replace(",", "");
-					queryString=queryString.replace(")", "");
-					queryString=queryString.replace("(", "");
-					queryString=queryString.replace("?", "");
-					queryString=queryString.replace("-", "");
-					queryString=queryString.replace("\n", "");
-					queryString=queryString.replace("!", "");
-					queryString=queryString.replace(":", "");
-					queryString=queryString.toLowerCase();
-					findSimilar(queryString,id);
-					NewsContainer.add(news);
-					NewsContainer.scale();
+					findSimilarNews(id);
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -91,6 +61,37 @@ public class SimilarNewsFinder implements Runnable {
 			}
 		}
 		
+	}
+	private void findSimilarNews(String id) throws Exception, IOException {
+		addToLuceneDB(id);
+		Datastore datasource = DBConnectorLucene.getDatasource();
+		News news =datasource.get(News.class, new ObjectId(id));
+		List<News> newsList = NewsContainer.getNews();
+		start();
+		writerEntries(newsList);
+		
+		String queryString=stem(news.title);
+		if(news.detail!=null){
+			queryString+=" "+stem(news.detail);
+		}
+		if(news.detailMore!=null){
+			queryString+=" "+stem(news.detailMore);
+		}
+		queryString=queryString.replace("\"", "");
+		queryString=queryString.replace(".", "");
+		queryString=queryString.replace("’", "");
+		queryString=queryString.replace("'", "");
+		queryString=queryString.replace(" ve ", "");
+		queryString=queryString.replace(",", "");
+		queryString=queryString.replace(")", "");
+		queryString=queryString.replace("(", "");
+		queryString=queryString.replace("?", "");
+		queryString=queryString.replace("-", "");
+		queryString=queryString.replace("\n", "");
+		queryString=queryString.replace("!", "");
+		queryString=queryString.replace(":", "");
+		queryString=queryString.toLowerCase();
+		findSimilar(queryString,id);
 	}
 	private void addToLuceneDB(String id) throws Exception {
 		Datastore datasource = DBConnector.getDatasource();
