@@ -1,5 +1,6 @@
 package container;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.bson.types.ObjectId;
@@ -104,8 +106,8 @@ public class SimilarNewsFinder implements Runnable {
 		config = new IndexWriterConfig(Version.LUCENE_42, analyzer);
 		config.setOpenMode(OpenMode.CREATE);
 
-		indexDir = new RAMDirectory(); //don't write on disk
-		//indexDir = FSDirectory.open(new File("/Path/to/luceneIndex/")); //write on disk
+//		indexDir = new RAMDirectory(); //don't write on disk
+		indexDir = FSDirectory.open(new File("/tmp")); //write on disk
 	}
 
 	public void writerEntries(List<News> newsList) throws IOException{
