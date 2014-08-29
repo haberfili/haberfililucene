@@ -9,6 +9,7 @@ import models.News;
 import mongo.DBConnector;
 import mongo.DBConnectorLucene;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -36,9 +37,7 @@ import com.google.code.morphia.Datastore;
 
 public class SimilarNewsFinder implements Runnable {
 	
-	private Directory indexDir;
-	private StandardAnalyzer analyzer;
-	private IndexWriterConfig config;
+	
 	@Override
 	public void run() {
 		
@@ -63,35 +62,55 @@ public class SimilarNewsFinder implements Runnable {
 		
 	}
 	private void findSimilarNews(String id) throws Exception, IOException {
-		addToLuceneDB(id);
-		Datastore datasource = DBConnectorLucene.getDatasource();
-		News news =datasource.get(News.class, new ObjectId(id));
-		List<News> newsList = NewsContainer.getNews();
-		start();
-		writerEntries(newsList);
+		Directory indexDir =null;
+		StandardAnalyzer analyzer =null;
+		IndexWriterConfig config =null;
+		try{
+			addToLuceneDB(id);
+			Datastore datasource = DBConnectorLucene.getDatasource();
+			News news =datasource.get(News.class, new ObjectId(id));
+			List<News> newsList = NewsContainer.getNews();
+			
+			indexDir = FSDirectory.open(new File("/tmp")); //write on disk;
+	//		indexDir = new RAMDirectory(); //don't write on disk
+			analyzer = new StandardAnalyzer(Version.LUCENE_42);
+			config = new IndexWriterConfig(Version.LUCENE_42, analyzer);;
+			
+			
+			writerEntries(newsList,indexDir,config);
+			
+			String queryString=stem(news.title);
+			if(news.detail!=null){
+				queryString+=" "+stem(news.detail);
+			}
+			if(news.detailMore!=null){
+				queryString+=" "+stem(news.detailMore);
+			}
+			queryString=queryString.replace("\"", "");
+			queryString=queryString.replace(".", "");
+			queryString=queryString.replace("’", "");
+			queryString=queryString.replace("'", "");
+			queryString=queryString.replace(" ve ", "");
+			queryString=queryString.replace(",", "");
+			queryString=queryString.replace(")", "");
+			queryString=queryString.replace("(", "");
+			queryString=queryString.replace("?", "");
+			queryString=queryString.replace("-", "");
+			queryString=queryString.replace("\n", "");
+			queryString=queryString.replace("!", "");
+			queryString=queryString.replace(":", "");
+			queryString=queryString.toLowerCase();
+			findSimilar(queryString,id,indexDir,analyzer);
+		}finally{
+			if(indexDir!=null){
+				indexDir.close();
+			}
+			if(analyzer!=null){
+				analyzer.close();
+			}
+			
+		}
 		
-		String queryString=stem(news.title);
-		if(news.detail!=null){
-			queryString+=" "+stem(news.detail);
-		}
-		if(news.detailMore!=null){
-			queryString+=" "+stem(news.detailMore);
-		}
-		queryString=queryString.replace("\"", "");
-		queryString=queryString.replace(".", "");
-		queryString=queryString.replace("’", "");
-		queryString=queryString.replace("'", "");
-		queryString=queryString.replace(" ve ", "");
-		queryString=queryString.replace(",", "");
-		queryString=queryString.replace(")", "");
-		queryString=queryString.replace("(", "");
-		queryString=queryString.replace("?", "");
-		queryString=queryString.replace("-", "");
-		queryString=queryString.replace("\n", "");
-		queryString=queryString.replace("!", "");
-		queryString=queryString.replace(":", "");
-		queryString=queryString.toLowerCase();
-		findSimilar(queryString,id);
 	}
 	private void addToLuceneDB(String id) throws Exception {
 		Datastore datasource = DBConnector.getDatasource();
@@ -102,16 +121,7 @@ public class SimilarNewsFinder implements Runnable {
 		}
 	}
 
-	public void start() throws IOException{
-		analyzer = new StandardAnalyzer(Version.LUCENE_42);
-		config = new IndexWriterConfig(Version.LUCENE_42, analyzer);
-		config.setOpenMode(OpenMode.CREATE);
-
-//		indexDir = new RAMDirectory(); //don't write on disk
-		indexDir = FSDirectory.open(new File("/tmp")); //write on disk
-	}
-
-	public void writerEntries(List<News> newsList) throws IOException{
+	public void writerEntries(List<News> newsList, Directory indexDir, IndexWriterConfig config) throws IOException{
 		IndexWriter indexWriter = new IndexWriter(indexDir, config);
 		indexWriter.commit();
 
@@ -150,7 +160,7 @@ public class SimilarNewsFinder implements Runnable {
 		doc.add(new Field("content", content, type));
 		return doc;
 	}
-	public void findSimilar(String searchForSimilar, String id) throws Exception {
+	public void findSimilar(String searchForSimilar, String id, Directory indexDir, Analyzer analyzer) throws Exception {
 		IndexReader reader = DirectoryReader.open(indexDir);
 		IndexSearcher indexSearcher = new IndexSearcher(reader);
 //		MoreLikeThis mlt = new MoreLikeThis(reader);
