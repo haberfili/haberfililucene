@@ -161,23 +161,10 @@ public class SimilarNewsFinder implements Runnable {
 		return doc;
 	}
 	public void findSimilar(String searchForSimilar, String id, Directory indexDir, Analyzer analyzer) throws Exception {
-		IndexReader reader = DirectoryReader.open(indexDir);
+		IndexReader reader=null;
+		try{
+		reader = DirectoryReader.open(indexDir);
 		IndexSearcher indexSearcher = new IndexSearcher(reader);
-//		MoreLikeThis mlt = new MoreLikeThis(reader);
-//	    mlt.setMinTermFreq(0);
-//	    mlt.setMinDocFreq(0);
-//	    mlt.setFieldNames(new String[]{"title", "content"});
-//	    mlt.setAnalyzer(analyzer);
-//	    Reader sReader = new StringReader(searchForSimilar);
-//	    Query query = mlt.like(sReader, null);
-		
-//		FuzzyQuery query = new FuzzyQuery(new Term("title",searchForSimilar), 2);
-		
-//		SpanQuery[] clauses = new SpanQuery[3];
-//		clauses[0] = new SpanMultiTermQueryWrapper(new FuzzyQuery(new Term("content", "Şans")));
-//		clauses[1] = new SpanMultiTermQueryWrapper(new FuzzyQuery(new Term("content", "ordusundan")));
-//		clauses[2] = new SpanMultiTermQueryWrapper(new FuzzyQuery(new Term("content", "çekilişi")));
-//		SpanNearQuery query = new SpanNearQuery(clauses, 1000, true);
 		String querystr = "";
 		String[] split = searchForSimilar.split(" ");
 		for(int i=0; i<split.length;i++){
@@ -218,7 +205,11 @@ public class SimilarNewsFinder implements Runnable {
 	    News news =datasource.get(News.class, new ObjectId(id));
 	    news.similarNews=similarNews;
 	    datasource.save(news);
-
+		}finally{
+			if(reader!=null){
+				reader.close();
+			}
+		}
 	}
 
 	private boolean hasNews(List<News> similarNews, String id) {
