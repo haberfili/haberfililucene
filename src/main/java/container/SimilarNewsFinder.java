@@ -44,9 +44,12 @@ public class SimilarNewsFinder implements Runnable {
 		while(true){
 			String id=NewsContainer.queue.poll();
 			try{
-				if(id!=null){
-					findSimilarNews(id);
+				if(id==null){
+					NewsContainer.running=false;
+					return;
 				}
+				findSimilarNews(id);
+				
 			}catch(Exception e){
 				e.printStackTrace();
 			}finally{
@@ -182,7 +185,7 @@ public class SimilarNewsFinder implements Runnable {
 		System.out.println(querystr);
 		Query query = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer).parse(querystr.trim());
 
-	    TopDocs topDocs = indexSearcher.search(query,10);
+		TopDocs topDocs = indexSearcher.search(query,10);
 	    
 	    List<News>similarNews=new ArrayList<News>();
 	    Datastore datasourceLucene = DBConnectorLucene.getDatasource();
