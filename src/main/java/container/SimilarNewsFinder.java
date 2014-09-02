@@ -49,12 +49,13 @@ public class SimilarNewsFinder implements Runnable {
 //					return;
 //				}
 				findSimilarNews(id);
-				System.gc();
+				
 			}catch(Exception e){
 				e.printStackTrace();
 			}finally{
 				//Pause for 3 seconds
 	            try {
+	            	System.gc();
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
