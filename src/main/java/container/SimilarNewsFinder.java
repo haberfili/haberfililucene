@@ -44,11 +44,12 @@ public class SimilarNewsFinder implements Runnable {
 		while(true){
 			String id=NewsContainer.queue.poll();
 			try{
-//				if(id==null){
+				if(id!=null){
 //					NewsContainer.running=false;
 //					return;
-//				}
-				findSimilarNews(id);
+					findSimilarNews(id);
+				}
+				
 				
 			}catch(Exception e){
 				e.printStackTrace();
