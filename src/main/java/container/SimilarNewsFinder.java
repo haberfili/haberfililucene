@@ -77,7 +77,7 @@ public class SimilarNewsFinder implements Runnable {
 			News news =datasource.get(News.class, new ObjectId(id));
 			List<News> newsList = NewsContainer.getNews();
 			
-			indexDir = FSDirectory.open(new File("/tmp2")); //write on disk;
+			indexDir = FSDirectory.open(new File("/tmp")); //write on disk;
 	//		indexDir = new RAMDirectory(); //don't write on disk
 			analyzer = new StandardAnalyzer(Version.LUCENE_42);
 			config = new IndexWriterConfig(Version.LUCENE_42, analyzer);;
