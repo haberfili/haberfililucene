@@ -199,14 +199,15 @@ public class SimilarNewsFinder implements Runnable {
 	        String similarTitle = aSimilar.get("title");
 	        String similarContent = aSimilar.get("content");
 	        
-	        if(!aSimilar.get("id").toString().equals(id) && !hasNews(similarNews,aSimilar.get("id"))){
+	        if(!aSimilar.get("id").toString().equals(id)){
 	        	similarNews.add(datasourceLucene.get(News.class, new ObjectId(aSimilar.get("id"))));
+	        	System.out.println("====similar finded====");
+		        System.out.println("title: "+ similarTitle);
+		        System.out.println("content: "+ similarContent);
 	        }
-	        System.out.println("====similar finded====");
-	        System.out.println("title: "+ similarTitle);
-	        System.out.println("content: "+ similarContent);
+	        
 	    }
-	    Datastore datasource = DBConnector.getDatasource();
+	    Datastore datasource = DBConnectorLucene.getDatasource();
 	    News news =datasource.get(News.class, new ObjectId(id));
 	    news.similarNews=similarNews;
 	    datasource.save(news);

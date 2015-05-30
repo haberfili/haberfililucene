@@ -13,7 +13,6 @@ import com.google.code.morphia.annotations.Reference;
 public class News  {
 	 @Id public ObjectId id;
 	 public String title,detail,link,image,source,detailMore,category;
-	 @Reference(lazy = true)  
 	 public List<News> similarNews = new ArrayList<News>();
 	 public long createDate;
  
