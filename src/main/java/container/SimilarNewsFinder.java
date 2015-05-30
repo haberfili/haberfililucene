@@ -3,6 +3,7 @@ package container;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import models.News;
@@ -76,7 +77,7 @@ public class SimilarNewsFinder implements Runnable {
 			News news =datasource.get(News.class, new ObjectId(id));
 			List<News> newsList = NewsContainer.getNews();
 			
-			indexDir = FSDirectory.open(new File("/tmp")); //write on disk;
+			indexDir = FSDirectory.open(new File("/tmp2")); //write on disk;
 	//		indexDir = new RAMDirectory(); //don't write on disk
 			analyzer = new StandardAnalyzer(Version.LUCENE_42);
 			config = new IndexWriterConfig(Version.LUCENE_42, analyzer);;
@@ -191,6 +192,7 @@ public class SimilarNewsFinder implements Runnable {
 	    
 	    List<News>similarNews=new ArrayList<News>();
 	    Datastore datasourceLucene = DBConnectorLucene.getDatasource();
+	    Datastore datasource= DBConnectorLucene.getDatasource();
 	    for ( ScoreDoc scoreDoc : topDocs.scoreDocs ) {
 	        if(similarNews.size()>=5){
 	        	break;
@@ -200,15 +202,24 @@ public class SimilarNewsFinder implements Runnable {
 	        String similarContent = aSimilar.get("content");
 	        
 	        if(!aSimilar.get("id").toString().equals(id)){
-	        	similarNews.add(datasourceLucene.get(News.class, new ObjectId(aSimilar.get("id"))));
-	        	System.out.println("====similar finded====");
-		        System.out.println("title: "+ similarTitle);
-		        System.out.println("content: "+ similarContent);
+	        	boolean found=false;
+	        	News newsToAdd = datasourceLucene.get(News.class, new ObjectId(aSimilar.get("id")));
+	        	for(News news : similarNews){
+	        		if(news.link.equals(newsToAdd.link)){
+	        			found=true;
+	        			break;
+	        		}
+	        	}
+	        	if(!found){
+		        	similarNews.add(newsToAdd);
+		        	System.out.println("====similar finded====");
+			        System.out.println("title: "+ similarTitle);
+			        System.out.println("content: "+ similarContent);
+	        	}
 	        }
 	        
 	    }
-	    Datastore datasource = DBConnectorLucene.getDatasource();
-	    News news =datasource.get(News.class, new ObjectId(id));
+	    News news =datasourceLucene.get(News.class, new ObjectId(id));
 	    news.similarNews=similarNews;
 	    datasource.save(news);
 		}finally{
@@ -218,6 +229,7 @@ public class SimilarNewsFinder implements Runnable {
 		}
 	}
 
+	
 	private boolean hasNews(List<News> similarNews, String id) {
 		for(News news : similarNews){
 			if(news.id.toString().equals(id)){
